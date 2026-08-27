@@ -1,0 +1,70 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
+
+np.random.seed(42)
+datas = pd.date_range(start="2024-01-01", end="2024-06-30", freq="D")
+produtos = ["Notebook", "Smartphone", "Fone de Ouvido", "Monitor"]
+
+dados = {
+    "Data": np.random.choice(datas, size=300),
+    "Produto": np.random.choice(produtos, size=300, p=[0.2, 0.4, 0.25, 0.15]),
+    "Quantidade": np.random.randint(1, 6, size=300),
+    "Preco_Unitario": 0
+}
+
+df = pd.DataFrame(dados)
+
+precos = {"Notebook": 3500, "Smartphone": 2000, "Fone de Ouvido": 150, "Monitor": 1200}
+df["Preco_Unitario"] = df["Produto"].map(precos)
+
+print("Dataset criado com sucesso! Primeiras linhas:")
+df.head
+
+df['Faturamento_Total'] = df['Quantidade'] * df['Preco_Unitario']
+
+faturamento_por_produto = df.groupby('Produto')['Faturamento_Total'].sum().reset_index()
+
+print("Faturamento total por produto:")
+display(faturamento_por_produto)
+
+
+plt.figure(figsize=(10, 6))
+sns.barplot(x='Produto', y='Faturamento_Total', data=faturamento_por_produto, palette='viridis')
+plt.title('Faturamento Total por Produto')
+plt.xlabel('Produto')
+plt.ylabel('Faturamento Total')
+plt.xticks(rotation=45, ha='right')
+plt.tight_layout()
+plt.show()
+
+
+df['Mes'] = df['Data'].dt.to_period('M')
+
+vendas_por_mes = df.groupby('Mes')['Faturamento_Total'].sum().reset_index()
+
+vendas_por_mes['Mes'] = vendas_por_mes['Mes'].astype(str)
+
+print("Evolução das vendas ao longo do tempo (por mês):")
+display(vendas_por_mes)
+
+
+plt.figure(figsize=(10, 6))
+sns.lineplot(x='Mes', y='Faturamento_Total', data=vendas_por_mes, marker='o')
+plt.title('Evolução das Vendas Mês a Mês')
+plt.xlabel('Mês')
+plt.ylabel('Faturamento Total')
+plt.xticks(rotation=45, ha='right')
+plt.grid(True, linestyle='--', alpha=0.7)
+plt.tight_layout()
+plt.show()
+
+
+quantidade_por_produto = df.groupby('Produto')['Quantidade'].sum().reset_index()
+
+plt.figure(figsize=(8, 8))
+plt.pie(quantidade_por_produto['Quantidade'], labels=quantidade_por_produto['Produto'], autopct='%1.1f%%', startangle=90, colors=sns.color_palette('pastel'))
+plt.title('Distribuição da Quantidade Vendida por Produto')
+plt.axis('equal')
+plt.show()
